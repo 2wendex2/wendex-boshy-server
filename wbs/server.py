@@ -41,6 +41,10 @@ class WendexBoshyServer(ServerProtocol):
             channel.sendMessage('pong', message.subchannel, self.factory.dummy,
                 typeName = message.getDataType(), asObject = message.isObject,
                 asDatagram = message.settings.get('datagram', False))
+        elif message.value == "/version":
+            channel.sendMessage('Wendex boshy server v%s' % __version__, message.subchannel, self.factory.dummy,
+                typeName = message.getDataType(), asObject = message.isObject,
+                asDatagram = message.settings.get('datagram', False))
 
     def privateMessageReceived(self, channel, recipient, message):
         protocolType = getProtocolType(message.settings)
