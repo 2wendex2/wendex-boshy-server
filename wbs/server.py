@@ -29,11 +29,13 @@ class WendexBoshyServer(ServerProtocol):
 
     def messageReceived(self, message):
         protocolType = getProtocolType(message.settings)
-        self.log('(%s) %s %r' % (protocolType, message.subchannel, message.value))
+        if protocolType=='TCP':
+            self.log('(%s) %s %r' % (protocolType, message.subchannel, message.value))
         
     def channelMessageReceived(self, channel, message):
         protocolType = getProtocolType(message.settings)
-        self.log('(%s)(%s) %s %r' % (protocolType, channel.name, message.subchannel, message.value))
+        if protocolType=='TCP':
+            self.log('(%s)(%s) %s %r' % (protocolType, channel.name, message.subchannel, message.value))
         if message.value == "/ping":
             channel.sendMessage('pong', message.subchannel, self.factory.dummy,
                 typeName = message.getDataType(), asObject = message.isObject,
@@ -52,7 +54,8 @@ class WendexBoshyServer(ServerProtocol):
 
     def privateMessageReceived(self, channel, recipient, message):
         protocolType = getProtocolType(message.settings)
-        self.log('(%s)(to %s) %s %r' % (protocolType, recipient.name, message.subchannel, message.value))
+        if protocolType=='TCP':
+            self.log('(%s)(to %s) %s %r' % (protocolType, recipient.name, message.subchannel, message.value))
 
     def loginAccepted(self, name):
         self.log('Name set to "%s"' % name)
