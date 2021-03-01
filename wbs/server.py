@@ -3,17 +3,14 @@ Server with basic logging (with UDP)
 """
 
 # try and run psyco for performance
-try:
-    import psyco
-    psyco.full()
-except ImportError:
-    pass # just leave it
+
 
 from twisted.internet import reactor
 from lacewing.server import ServerProtocol, ServerDatagram, ServerFactory
 from dummy import DUMMY_PLAYER_NAME, DummyProtocol
 from __init__ import __version__
 from lacewing.multidict import MultikeyDict
+from boshyframes import BOSHY_FRAMES
 
 PROHIBITED_NICKNAMES = [
     'OnlineCoop', DUMMY_PLAYER_NAME
@@ -43,6 +40,13 @@ class WendexBoshyServer(ServerProtocol):
                 asDatagram = message.settings.get('datagram', False))
         elif message.value == "/version":
             channel.sendMessage('Wendex boshy server v%s' % __version__, message.subchannel, self.factory.dummy,
+                typeName = message.getDataType(), asObject = message.isObject,
+                asDatagram = message.settings.get('datagram', False))
+        else:
+            splitted = message.value.split()
+            if (len(splitted) == 4 and splitted[0] == '/save' and splitted[1] in BOSHY_FRAMES and
+                splitted[2].isdigit() and splitted[3].isdigit()):
+                channel.sendMessage('%s|%s|%s|%s' % (splitted[2], splitted[3], BOSHY_FRAMES[splitted[1]], 0), 63, self.factory.dummy,
                 typeName = message.getDataType(), asObject = message.isObject,
                 asDatagram = message.settings.get('datagram', False))
 
@@ -95,15 +99,20 @@ class WendexBoshyFactory(ServerFactory):
     welcomeMessage = 'Wendex Boshy Server v' + __version__
     dummy = None
     
+    def run(self):
+        try:
+            import psyco
+            psyco.full()
+        except ImportError:
+            pass
+        
+        port = reactor.listenTCP(6121, self)
+        reactor.listenUDP(6121, ServerDatagram(self))
+        print 'Opening new server on port %s...' % port.port
+        reactor.run()
+    
     def startFactory(self):
         ServerFactory.startFactory(self)
         channels = MultikeyDict()
         self.dummy = DummyProtocol(self)
     
-newFactory = WendexBoshyFactory()
-# connect the main TCP factory
-port = reactor.listenTCP(6121, newFactory)
-reactor.listenUDP(6121, ServerDatagram(newFactory))
-# just so we know it's working
-print 'Opening new server on port %s...' % port.port
-reactor.run()
