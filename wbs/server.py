@@ -99,16 +99,16 @@ class WendexBoshyFactory(ServerFactory):
     welcomeMessage = 'Wendex Boshy Server v' + __version__
     dummy = None
     
-    def run(self):
+    def run(self, prt):
         try:
             import psyco
             psyco.full()
         except ImportError:
             pass
         
-        port = reactor.listenTCP(6121, self)
-        reactor.listenUDP(6121, ServerDatagram(self))
-        print 'Opening new server on port %s...' % port.port
+        port = reactor.listenTCP(prt, self)
+        reactor.listenUDP(prt, ServerDatagram(self))
+        print 'Opening new server on port %s...' % prt
         reactor.run()
     
     def startFactory(self):
